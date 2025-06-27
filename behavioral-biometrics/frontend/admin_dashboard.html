@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>Fraud Monitoring</title></head>
+<body>
+<h2>Live Sessions</h2>
+<table border="1" id="logTable"><tr>
+<th>Time</th><th>IP</th><th>City</th><th>Country</th><th>Fraud</th></tr></table>
+<script>
+setInterval(() => {
+    fetch('http://127.0.0.1:5000/logs')
+        .then(res => res.json())
+        .then(logs => {
+            const table = document.getElementById('logTable');
+            table.innerHTML = "<tr><th>Time</th><th>IP</th><th>City</th><th>Country</th><th>Fraud</th></tr>";
+            logs.forEach(row => {
+                table.innerHTML += `<tr>
+                    <td>${row.time}</td><td>${row.ip}</td><td>${row.city}</td><td>${row.country}</td><td>${row.fraud ? "Yes" : "No"}</td>
+                </tr>`;
+            });
+        });
+    });
+</script>
+</body>
+</html>
