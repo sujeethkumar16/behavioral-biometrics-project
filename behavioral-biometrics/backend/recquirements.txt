@@ -4,4 +4,4 @@ tensorflow
 numpy
 requests
 gunicorn
-tensorflow==2.13.0
+tensorflow-cpu==2.13.0
