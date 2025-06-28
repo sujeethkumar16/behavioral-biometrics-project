@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: behavioral-biometrics-app
+    name: behavioral-biometrics
     env: python
-    buildCommand: pip install -r behavioral-biometrics/requirements.txt
-    startCommand: python behavioral-biometrics/app.py
-    pythonVersion: 3.10.13
     plan: free
-    autoDeploy: true
+    rootDir: behavioral-biometrics
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    pythonVersion: 3.10.13
