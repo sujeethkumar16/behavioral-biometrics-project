@@ -12,9 +12,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# Load the PyTorch model
 model = torch.load("pytorch_model.pth")
-model.eval()  # Set the model to evaluation mode
+model.eval()
 
 def get_geo_info(ip):
     try:
@@ -34,11 +33,10 @@ def predict():
         data['avg_key_delay']
     ], dtype=np.float32).reshape(1, 1, -1)
 
-    # Convert to PyTorch tensor
     X_tensor = torch.from_numpy(X)
 
-    with torch.no_grad():  # Disable gradient calculation
-        prediction = model(X_tensor).item() > 0.5  # Get the prediction
+    with torch.no_grad():
+        prediction = model(X_tensor).item() > 0.5
 
     ip = request.remote_addr
     geo = get_geo_info(ip)
