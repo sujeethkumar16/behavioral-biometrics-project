@@ -1,6 +1,3 @@
-import sys
-print("Running on Python version:", sys.version)
-
 from flask import Flask, request, jsonify
 from models import db, SessionLog
 import torch
