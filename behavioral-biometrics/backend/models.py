@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, request, jsonify
 from django import setup
-from app.models import SessionLog
+from backend.app import SessionLog
 from datetime import datetime
 import requests
 
