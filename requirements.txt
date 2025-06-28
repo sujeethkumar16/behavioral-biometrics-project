@@ -3,4 +3,3 @@ requests
 gunicorn
 flask
 flask_sqlalchemy
-tensorflow-cpu
