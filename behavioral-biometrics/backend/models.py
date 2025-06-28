@@ -1,16 +1,57 @@
+import os
+import sys
+from flask import Flask, request, jsonify
+from django import setup
+from myapp.models import SessionLog
+from datetime import datetime
+import requests
 
-from flask_sqlalchemy import SQLAlchemy
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+setup()
 
-db = SQLAlchemy()
+app = Flask(__name__)
 
-class SessionLog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.String(100))
-    ip = db.Column(db.String(100))
-    city = db.Column(db.String(100))
-    country = db.Column(db.String(100))
-    avg_speed = db.Column(db.Float)
-    avg_click_delay = db.Column(db.Float)
-    movement_variance = db.Column(db.Float)
-    avg_key_delay = db.Column(db.Float)
-    is_fraud = db.Column(db.Boolean)
+def get_geo_info(ip):
+    try:
+        r = requests.get(f"http://ip-api.com/json/{ip}").json()
+        return {'ip': ip, 'city': r.get('city'), 'country': r.get('country')}
+    except Exception as e:
+        print(f"Error fetching geo info: {e}")
+        return {'ip': ip, 'city': 'unknown', 'country': 'unknown'}
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    ip = request.remote_addr
+    geo = get_geo_info(ip)
+
+    log = SessionLog(
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        ip=ip,
+        city=geo['city'],
+        country=geo['country'],
+        avg_speed=data['avg_speed'],
+        avg_click_delay=data['avg_click_delay'],
+        movement_variance=data['movement_variance'],
+        avg_key_delay=data['avg_key_delay'],
+        is_fraud=data.get('is_fraud', False)
+    )
+    log.save()
+
+    return jsonify({'fraud': int(log.is_fraud)})
+
+@app.route('/logs')
+def get_logs():
+    logs = SessionLog.objects.order_by('-id')[:50]
+    return jsonify([
+        {
+            'time': log.timestamp,
+            'ip': log.ip,
+            'city': log.city,
+            'country': log.country,
+            'fraud': log.is_fraud
+        } for log in logs
+    ])
+
+if __name__ == '__main__':
+    app.run(debug=True)
