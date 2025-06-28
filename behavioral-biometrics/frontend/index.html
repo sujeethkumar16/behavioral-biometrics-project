@@ -1,10 +1,41 @@
 <!DOCTYPE html>
-<html>
-<head><title>User Login</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Behavioral Biometrics Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 <body>
-  <input type="text" id="inputField" placeholder="Type here..." />
-  <button onclick="sendData()">Submit</button>
-  <p id="result"></p>
-  <script src="script.js"></script>
+  <div class="container">
+    <h1>User Behavior Verification</h1>
+    <form id="bioForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required />
+
+      <label for="keystrokeData">Keystroke Data:</label>
+      <textarea id="keystrokeData" name="keystrokeData" rows="4" required></textarea>
+
+      <button type="submit">Verify</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById("bioForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const keystrokeData = document.getElementById("keystrokeData").value;
+
+      const response = await fetch("http://localhost:5000/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, keystrokeData }),
+      });
+
+      const data = await response.json();
+      document.getElementById("result").innerText = "Result: " + data.status;
+    });
+  </script>
 </body>
 </html>
