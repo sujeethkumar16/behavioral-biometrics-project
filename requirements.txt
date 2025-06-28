@@ -1,0 +1,6 @@
+numpy
+requests
+gunicorn
+flask
+flask_sqlalchemy
+tensorflow-cpu==2.13.0
