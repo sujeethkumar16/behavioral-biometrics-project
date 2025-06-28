@@ -2,12 +2,17 @@ import os
 import sys
 from flask import Flask, request, jsonify
 from django import setup
-from backend.app import SessionLog
+
 from datetime import datetime
 import requests
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 setup()
+
+class SessionLog(db.Model):
+    __tablename__ = 'session_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    ...
 
 app = Flask(__name__)
 
