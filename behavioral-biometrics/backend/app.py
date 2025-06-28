@@ -12,7 +12,7 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-model = torch.load("pytorch_model.pth")
+model = torch.load("pytorch_model.pth", weights_only=False)
 model.eval()
 
 def get_geo_info(ip):
