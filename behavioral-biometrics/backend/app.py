@@ -3,10 +3,10 @@ print("Running on Python version:", sys.version)
 
 from flask import Flask, request, jsonify
 from models import db, SessionLog
-from tensorflow.keras.models import load_model
-from datetime import datetime
+import torch
 import numpy as np
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sessions.db'
@@ -15,13 +15,16 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-model = load_model("lstm_model.h5")
+# Load the PyTorch model
+model = torch.load("pytorch_model.pth")
+model.eval()  # Set the model to evaluation mode
 
 def get_geo_info(ip):
     try:
         r = requests.get(f"http://ip-api.com/json/{ip}").json()
         return {'ip': ip, 'city': r.get('city'), 'country': r.get('country')}
-    except:
+    except Exception as e:
+        print(f"Error fetching geo info: {e}")
         return {'ip': ip, 'city': 'unknown', 'country': 'unknown'}
 
 @app.route('/predict', methods=['POST'])
@@ -32,9 +35,14 @@ def predict():
         data['avg_click_delay'],
         data['movement_variance'],
         data['avg_key_delay']
-    ]).reshape(1, 1, -1)
+    ], dtype=np.float32).reshape(1, 1, -1)
 
-    prediction = model.predict(X)[0][0] > 0.5
+    # Convert to PyTorch tensor
+    X_tensor = torch.from_numpy(X)
+
+    with torch.no_grad():  # Disable gradient calculation
+        prediction = model(X_tensor).item() > 0.5  # Get the prediction
+
     ip = request.remote_addr
     geo = get_geo_info(ip)
 
